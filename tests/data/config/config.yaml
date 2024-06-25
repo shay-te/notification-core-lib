@@ -1,0 +1,4 @@
+defaults:
+  - core_lib
+  - notification_core_lib
+  - notification_core_lib_override

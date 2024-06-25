@@ -1,0 +1,23 @@
+# @package _global_
+core_lib:
+  notification_core_lib:
+    cache:
+      notification:
+        type: memcached
+        url:
+          host: ${oc.env:MEMCACHED_HOST}
+          port: ${oc.env:MEMCACHED_PORT}
+  data:
+    sqlalchemy:
+      log_queries: false
+      create_db: false
+      session:
+        pool_recycle: 3200
+        pool_pre_ping: false
+      url:
+        file: ${oc.env:POSTGRES_DB}
+        protocol: postgresql
+        username: ${oc.env:POSTGRES_USER}
+        password: ${oc.env:POSTGRES_PASSWORD}
+        port: ${oc.env:POSTGRES_PORT}
+        host: ${oc.env:POSTGRES_HOST}
