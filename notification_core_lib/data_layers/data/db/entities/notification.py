@@ -2,8 +2,6 @@ from sqlalchemy import Column, Integer, VARCHAR, JSON, INTEGER
 from core_lib.data_layers.data.db.sqlalchemy.base import Base
 from core_lib.data_layers.data.db.sqlalchemy.mixins.soft_delete_mixin import SoftDeleteMixin
 
-from notification_core_lib.constants import DEFAULT_PROJECT_ID
-
 
 class Notification(Base, SoftDeleteMixin):
 

@@ -29,3 +29,4 @@ class NotificationDataAccess(DataAccess):
             if meta_data:
                 query = sqlalchemy_filter_query_by_meta_data(Notification, Notification.meta_data.key, query, meta_data)
             return query.filter(Notification.created_at > after_time, Notification.project_id == project_id).all()
+
