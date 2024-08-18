@@ -31,6 +31,7 @@ def upgrade():
         sa.Column(Notification.created_at.key, sa.DateTime, default=datetime.utcnow),
         sa.Column(Notification.updated_at.key, sa.DateTime, default=datetime.utcnow),
         sa.Column(Notification.deleted_at.key, sa.DateTime, default=None),
+        sa.Index(Notification.INDEX_TITLE_CREATED_AT, 'title', 'created_at', unique=True),
     )
 
     op.create_table(
@@ -42,5 +43,6 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table(UserNotification.__tablename__)
     op.drop_table(Notification.__tablename__)
+    op.drop_table(UserNotification.__tablename__)
+    op.drop_index(Notification.INDEX_TYPE_CREATED_AT, table_name=Notification.__tablename__)

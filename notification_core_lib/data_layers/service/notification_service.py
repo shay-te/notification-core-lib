@@ -23,12 +23,14 @@ class NotificationService(Service):
     # With no matter what params
     @ResultToDict()
     def all(self, user_id: int, meta_data: dict = None, project_id: int = DEFAULT_PROJECT_ID):
+
+        notifications = self._notification_data_access.all(user_id, meta_data or {}, project_id)
         user_notification = self._user_notification_data_access.get(user_id)
+
         if not user_notification:
             self._user_notification_data_access.create(user_id)
-            after_time = datetime.datetime(1970, 1, 1)
         else:
-            after_time = user_notification.read_at
             self._user_notification_data_access.update(user_id)
-        return self._notification_data_access.all(after_time, meta_data or {}, project_id)
+
+        return notifications
 
