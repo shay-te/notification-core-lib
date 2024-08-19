@@ -25,12 +25,13 @@ class NotificationDataAccess(DataAccess):
             session.add(notification)
         return notification
 
-    def all(self, meta_data: dict, project_id: int):
+    def all(self, meta_data: dict, user_id: int, project_id: int):
         with self._db.get() as session:
             query = session.query(Notification).filter(
                 Notification.project_id == project_id
             )
-
+            # join
+            # wirte test
             if meta_data:
                 query = query.filter(cast(Notification.meta_data, JSONB).contains(meta_data))
 
