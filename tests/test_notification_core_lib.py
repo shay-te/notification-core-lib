@@ -24,25 +24,33 @@ class TestNotification(unittest.TestCase):
         self.notification_core_lib.notification.create('', {'type': 10, 'user_reference_id': '2', 'user_reference_id_2': '44', 'content': ' when an unknowt to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'}, None)
 
         self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {}, couple_id)), 1)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'a': 1}, couple_id)), 0)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'filters_data': {'a': 1}}, couple_id)), 0)
         self.notification_core_lib.notification.create('some notification', {}, couple_id)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {}, couple_id)), 1)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'a': 1}, couple_id)), 0)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'filters_data': {}}, couple_id)), 1)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'filters_data': {'a': 1}}, couple_id)), 0)
 
         self.notification_core_lib.notification.create('some notification', {'a': 1}, couple_id)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {}, couple_id)), 2)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'a': 1}, couple_id)), 1)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'filters_data': {}}, couple_id)), 2)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_1, {'filters_data': {'a': 1}}, couple_id)), 1)
 
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {}, couple_id)), 2)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {}}, couple_id)), 2)
         self.notification_core_lib.notification.create('some notification', {'b': 'bb'}, couple_id)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'b': 'bb'}, couple_id)), 1)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {}, couple_id)), 3)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'b': 'bb'}}, couple_id)), 1)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {}}, couple_id)), 3)
 
         self.notification_core_lib.notification.create('some notification', {'a': 1, 'b': 'bb', 'c': [1,2,3]}, couple_id)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'b': 'bb', 'c': [1,2,3]}, couple_id)), 1)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'b': 'bb'}, couple_id)), 2)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'b': 'bb', 'c': [1, 2, 3]}}, couple_id)), 1)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'b': 'bb'}}, couple_id)), 2)
 
-        self.notification_core_lib.notification.create('some notification', {'a': 1, 'b': 'bb', 'c': 3.1}, couple_id)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'c': 3.1}, couple_id)), 1)
-        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'a': 1}, couple_id)), 3)
+        self.notification_core_lib.notification.create('some notification', {'a': 1, 'b': 'bb', 'c': 3.1, 'modules': [1]}, couple_id)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'c': 3.1}}, couple_id)), 1)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'a': 1}}, couple_id)), 3)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'a': 1}, 'modules_license': [1, 5]}, couple_id)), 1)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'a': 1}, 'modules_license': [4, 5]}, couple_id)), 0)
+        self.notification_core_lib.notification.create('some notification', {'a': 1, 'b': 'bb', 'c': 3.1, 'modules': [4, 7, 8]}, couple_id)
+        self.assertEqual(len(self.notification_core_lib.notification.all(user_id_2, {'filters_data': {'a': 1}, 'modules_license': [4, 7, 9, 8]}, couple_id)), 1)
+
+
+
+
 

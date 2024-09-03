@@ -22,7 +22,7 @@ class NotificationService(Service):
     # Pay attention to get all with the correct filter. when you made the query the after_time is neing updates
     # With no matter what params
     @ResultToDict()
-    def all(self, meta_data: dict = None, user_id: int = None, project_id: int = DEFAULT_PROJECT_ID):
-        notifications = self._notification_data_access.all(meta_data or {}, user_id, project_id)
+    def all(self, meta_data: dict = None, user_license: list = None, project_id: int = DEFAULT_PROJECT_ID):
+        notifications = self._notification_data_access.all(meta_data or {}, user_license, project_id)
 
         return notifications
