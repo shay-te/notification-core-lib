@@ -1,3 +1,5 @@
+from core_lib.core_lib_listener import CoreLibListener
+from core_lib.observer.observer import Observer
 from omegaconf import DictConfig
 import os
 import inspect
@@ -10,6 +12,7 @@ from core_lib.connection.sql_alchemy_connection_registry import SqlAlchemyConnec
 from notification_core_lib.data_layers.data_access.notification_data_access import NotificationDataAccess
 from notification_core_lib.data_layers.data_access.user_notification_data_access import UserNotificationDataAccess
 from notification_core_lib.data_layers.service.notification_service import NotificationService
+from notification_core_lib.observer.notification_listener import NotificationListener
 
 
 class NotificationCoreLib(CoreLib):
@@ -20,6 +23,11 @@ class NotificationCoreLib(CoreLib):
         CoreLib.cache_registry.register('notification', CacheHandlerMemcached(build_url(**self.config.core_lib.notification_core_lib.cache.notification.url)))
         db = SqlAlchemyConnectionRegistry(self.config.core_lib.data.sqlalchemy)
         self.notification = NotificationService(NotificationDataAccess(db), UserNotificationDataAccess(db))
+        self.notification_observer = Observer()
+
+    def attach_notification_listener(self, notification_server_listener:NotificationListener):
+        from notification_core_lib.observer.notification_observer_listener import NotificationObserverListener
+        self.notification_observer.attach(NotificationObserverListener(notification_server_listener))
 
     @staticmethod
     def install(cfg: DictConfig):

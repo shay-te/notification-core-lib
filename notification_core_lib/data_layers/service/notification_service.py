@@ -2,10 +2,12 @@ import datetime
 
 from core_lib.data_layers.service.service import Service
 from core_lib.data_transform.result_to_dict import ResultToDict
+from core_lib.observer.observer_decorator import Observe
 
-from notification_core_lib.constants import DEFAULT_PROJECT_ID
+from notification_core_lib.constants import DEFAULT_PROJECT_ID, NOTIFICATION_CORE_LIB_NAME
 from notification_core_lib.data_layers.data_access.notification_data_access import NotificationDataAccess
 from notification_core_lib.data_layers.data_access.user_notification_data_access import UserNotificationDataAccess
+from notification_core_lib.observer.notification_observer_listener import NotificationObserverListener
 
 
 class NotificationService(Service):
@@ -15,6 +17,7 @@ class NotificationService(Service):
         self._notification_data_access = notification_data_access
         self._user_notification_data_access = user_notification_data_access
 
+    @Observe(event_key=NotificationObserverListener.EVENT_NOTIFICATION_CREATED, observer_name=NOTIFICATION_CORE_LIB_NAME)
     @ResultToDict()
     def create(self, title, meta_data: dict, project_id: int = DEFAULT_PROJECT_ID):
         return self._notification_data_access.create(title, meta_data, project_id)
