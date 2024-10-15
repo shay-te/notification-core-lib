@@ -9,6 +9,7 @@ from datetime import datetime
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import ForeignKey
 
 from notification_core_lib.data_layers.data.db.entities.notification import Notification
 from notification_core_lib.data_layers.data.db.entities.user_notification import UserNotification
@@ -37,6 +38,7 @@ def upgrade():
         UserNotification.__tablename__,
         sa.Column(UserNotification.id.key, sa.Integer, primary_key=True, nullable=False),
         sa.Column(UserNotification.user_id.key, sa.Integer, nullable=False),
+        sa.Column(UserNotification.notification_id.key, sa.Integer, ForeignKey('notification.id'), nullable=False),
         sa.Column(UserNotification.read_at.key, sa.DateTime, nullable=False)
     )
 
