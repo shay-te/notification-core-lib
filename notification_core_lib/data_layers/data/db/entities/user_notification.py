@@ -11,4 +11,3 @@ class UserNotification(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(INTEGER, nullable=False)
     notification_id = Column(Integer, ForeignKey('notification.id'), nullable=False)
-    read_at = Column(DateTime, default=datetime.utcnow)

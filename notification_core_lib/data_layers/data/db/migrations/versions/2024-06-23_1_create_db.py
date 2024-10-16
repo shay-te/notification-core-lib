@@ -39,10 +39,9 @@ def upgrade():
         sa.Column(UserNotification.id.key, sa.Integer, primary_key=True, nullable=False),
         sa.Column(UserNotification.user_id.key, sa.Integer, nullable=False),
         sa.Column(UserNotification.notification_id.key, sa.Integer, ForeignKey('notification.id'), nullable=False),
-        sa.Column(UserNotification.read_at.key, sa.DateTime, nullable=False)
     )
 
 
 def downgrade():
-    op.drop_table(Notification.__tablename__)
     op.drop_table(UserNotification.__tablename__)
+    op.drop_table(Notification.__tablename__)
