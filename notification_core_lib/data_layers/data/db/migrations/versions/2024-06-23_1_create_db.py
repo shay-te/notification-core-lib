@@ -39,6 +39,7 @@ def upgrade():
         sa.Column(UserNotification.id.key, sa.Integer, primary_key=True, nullable=False),
         sa.Column(UserNotification.user_id.key, sa.Integer, nullable=False),
         sa.Column(UserNotification.notification_id.key, sa.Integer, ForeignKey('notification.id'), nullable=False),
+        sa.Index(UserNotification.INDEX_USER_ID, 'user_id', unique=True),
     )
 
 
