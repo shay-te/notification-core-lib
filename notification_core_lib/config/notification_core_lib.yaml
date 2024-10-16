@@ -21,3 +21,5 @@ core_lib:
         password: ${oc.env:POSTGRES_PASSWORD}
         port: ${oc.env:POSTGRES_PORT}
         host: ${oc.env:POSTGRES_HOST}
+  alembic:
+    version_table: notification_alembic_version

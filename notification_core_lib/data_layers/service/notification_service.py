@@ -1,34 +1,38 @@
-import datetime
-
 from core_lib.data_layers.service.service import Service
 from core_lib.data_transform.result_to_dict import ResultToDict
+from notification_core_lib.constants.core_lib_constants import DEFAULT_PROJECT_ID
 
-from notification_core_lib.constants import DEFAULT_PROJECT_ID
+from notification_core_lib.data_layers.data.db.entities.notification import Notification
+from notification_core_lib.data_layers.data.db.entities.user_notification import UserNotification
 from notification_core_lib.data_layers.data_access.notification_data_access import NotificationDataAccess
-from notification_core_lib.data_layers.data_access.user_notification_data_access import UserNotificationDataAccess
+from notification_core_lib.data_layers.service.user_notification_service import UserNotificationService
 
 
 class NotificationService(Service):
 
-    def __init__(self, notification_data_access: NotificationDataAccess,
-                 user_notification_data_access: UserNotificationDataAccess):
+    def __init__(self,
+                 notification_data_access: NotificationDataAccess,
+                 user_notification_service: UserNotificationService):
         self._notification_data_access = notification_data_access
-        self._user_notification_data_access = user_notification_data_access
+        self._user_notification_service = user_notification_service
 
     @ResultToDict()
     def create(self, title, meta_data: dict, project_id: int = DEFAULT_PROJECT_ID):
-        return self._notification_data_access.create(title, meta_data, project_id)
+        return self._notification_data_access.create({
+            Notification.title.key: title,
+            Notification.meta_data.key: meta_data,
+            Notification.project_id.key: project_id
+        })
 
-    # Pay attention to get all with the correct filter. when you made the query the after_time is neing updates
-    # With no matter what params
     @ResultToDict()
-    def all(self, user_id: int, meta_data: dict = None, project_id: int = DEFAULT_PROJECT_ID):
-        user_notification = self._user_notification_data_access.get(user_id)
-        if not user_notification:
-            self._user_notification_data_access.create(user_id)
-            after_time = datetime.datetime(1970, 1, 1)
-        else:
-            after_time = user_notification.read_at
-            self._user_notification_data_access.update(user_id)
-        return self._notification_data_access.all(after_time, meta_data or {}, project_id)
+    def all(self, title: str = None, meta_data: dict = None, user_id: int = None, project_id: int = DEFAULT_PROJECT_ID):
+        notifications = self._notification_data_access.all(title, meta_data, user_id, project_id)
+        return notifications
 
+    def read(self, user_id: int, notification_id: int):
+        last_read_notification = self._user_notification_service.get_by_user(user_id)
+        if last_read_notification:
+            if last_read_notification[UserNotification.notification_id.key] < notification_id:
+                self._user_notification_service.update(last_read_notification[UserNotification.id.key], notification_id)
+        else:
+            self._user_notification_service.create(user_id, notification_id)
