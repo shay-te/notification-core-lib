@@ -13,21 +13,8 @@ class UserNotificationDataAccess(CRUDDataAccess):
         self.logger = logging.getLogger(self.__class__.__name__)
         self._db = db
 
-    def read(self, user_id: int, notification_id: int):
-        field = None
+    def get_by_user(self, user_id: int):
         with self._db.get() as session:
-            existing_value = session.query(UserNotification) \
-                .filter(
+            return session.query(UserNotification).filter(
                 UserNotification.user_id == user_id,
             ).first()
-            if existing_value:
-                existing_value.notification_id = notification_id
-                field = existing_value
-            else:
-                user_notification = UserNotification()
-                user_notification.user_id = user_id
-                user_notification.notification_id = notification_id
-                session.add(user_notification)
-                session.commit()
-                field = user_notification
-        return field

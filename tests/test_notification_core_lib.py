@@ -34,6 +34,12 @@ class TestNotification(unittest.TestCase):
         for notification in all_notifications:
             self.assertTrue(notification['is_read'])
 
+        # If trying to read a previous notification again it will do nothing
+        self.notification_core_lib.notification.read(user_id, latest_notification['id'] - 2)
+        all_notifications = self.notification_core_lib.notification.all(None, {}, user_id, project_id)
+        for notification in all_notifications:
+            self.assertTrue(notification['is_read'])
+
         self.notification_core_lib.notification.create('some notification 1', {}, project_id)
         latest_notification = self.notification_core_lib.notification.all(None, {}, user_id, project_id)[0]
         self.assertFalse(latest_notification['is_read'])

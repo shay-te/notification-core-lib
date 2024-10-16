@@ -1,22 +1,20 @@
-import datetime
-
 from core_lib.data_layers.service.service import Service
 from core_lib.data_transform.result_to_dict import ResultToDict
+from notification_core_lib.constants.core_lib_constants import DEFAULT_PROJECT_ID
 
-from notification_core_lib.constants import DEFAULT_PROJECT_ID
 from notification_core_lib.data_layers.data.db.entities.notification import Notification
 from notification_core_lib.data_layers.data.db.entities.user_notification import UserNotification
 from notification_core_lib.data_layers.data_access.notification_data_access import NotificationDataAccess
-from notification_core_lib.data_layers.data_access.user_notification_data_access import UserNotificationDataAccess
+from notification_core_lib.data_layers.service.user_notification_service import UserNotificationService
 
 
 class NotificationService(Service):
 
     def __init__(self,
                  notification_data_access: NotificationDataAccess,
-                 user_notification_data_access: UserNotificationDataAccess):
+                 user_notification_service: UserNotificationService):
         self._notification_data_access = notification_data_access
-        self._user_notification_data_access = user_notification_data_access
+        self._user_notification_service = user_notification_service
 
     @ResultToDict()
     def create(self, title, meta_data: dict, project_id: int = DEFAULT_PROJECT_ID):
@@ -32,4 +30,9 @@ class NotificationService(Service):
         return notifications
 
     def read(self, user_id: int, notification_id: int):
-        self._user_notification_data_access.read(user_id, notification_id)
+        last_read_notification = self._user_notification_service.get_by_user(user_id)
+        if last_read_notification:
+            if last_read_notification[UserNotification.notification_id.key] < notification_id:
+                self._user_notification_service.update(last_read_notification[UserNotification.id.key], notification_id)
+        else:
+            self._user_notification_service.create(user_id, notification_id)
