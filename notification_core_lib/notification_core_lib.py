@@ -29,7 +29,7 @@ class NotificationCoreLib(CoreLib):
             UserNotificationService(UserNotificationDataAccess(db))
         )
 
-        self._notification_observer = Observer()
+        self._notification_observer = Observer(None, NotificationObserverListener)
         CoreLib.observer_registry.register(NOTIFICATION_CORE_LIB_NAME, self._notification_observer)
 
     def attach_notification_listener(self, notification_listener: NotificationListener):
