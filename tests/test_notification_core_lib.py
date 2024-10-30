@@ -1,12 +1,25 @@
 import unittest
 import random
+
+from notification_core_lib.observer.notification_listener import NotificationListener
 from tests.helpers.utils import sync_create_start_core_lib
+
+
+class NotificationListenerHandler(NotificationListener):
+
+    def __init__(self):
+        self.call_notify_count = 0
+
+    def notify(self, notification: dict):
+        self.call_notify_count = self.call_notify_count + 1
 
 
 class TestNotification(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.notification_core_lib = sync_create_start_core_lib()
+        cls.listener = NotificationListenerHandler()
+        cls.notification_core_lib.attach_notification_listener(cls.listener)
 
     def test_notification(self):
         project_id = random.randint(2000, 1000000)
@@ -20,6 +33,8 @@ class TestNotification(unittest.TestCase):
         self.notification_core_lib.notification.create('user 123user change his name', {'type': 10, 'user_reference_id': '2', 'user_reference_id_2': '44', 'content': ' when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'}, project_id)
         self.notification_core_lib.notification.create('some notification', {'type': 10, 'user_reference_id': '2', 'user_reference_id_2': '44', 'content': ' when an unknowt to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'}, project_id)
         self.notification_core_lib.notification.create('', {'type': 10, 'user_reference_id': '2', 'user_reference_id_2': '44', 'content': ' when an unknowt to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'}, project_id)
+
+        self.assertEqual(self.listener.call_notify_count, 8)
 
         self.assertEqual(len(self.notification_core_lib.notification.all(None, {}, user_id, project_id)), 8)
         self.assertEqual(len(self.notification_core_lib.notification.all(None, {'a': 1}, user_id, project_id)), 0)
@@ -47,3 +62,6 @@ class TestNotification(unittest.TestCase):
         self.notification_core_lib.notification.read(user_id, latest_notification['id'])
         latest_notification = self.notification_core_lib.notification.all(None, {}, user_id, project_id)[0]
         self.assertTrue(latest_notification['is_read'])
+
+        self.assertEqual(self.listener.call_notify_count, 10)
+
