@@ -1,11 +1,14 @@
 from core_lib.data_layers.service.service import Service
-from core_lib.data_transform.result_to_dict import ResultToDict
-from notification_core_lib.constants.core_lib_constants import DEFAULT_PROJECT_ID
+from core_lib.data_transform.result_to_dict import ResultToDict, result_to_dict
+from core_lib.observer.observer_decorator import Observe
+from notification_core_lib.constants.core_lib_constants import DEFAULT_PROJECT_ID, NOTIFICATION_CORE_LIB_NAME, \
+    PER_PAGE_NOTIFICATIONS
 
 from notification_core_lib.data_layers.data.db.entities.notification import Notification
 from notification_core_lib.data_layers.data.db.entities.user_notification import UserNotification
 from notification_core_lib.data_layers.data_access.notification_data_access import NotificationDataAccess
 from notification_core_lib.data_layers.service.user_notification_service import UserNotificationService
+from notification_core_lib.observer.notification_observer_listener import NotificationObserverListener
 
 
 class NotificationService(Service):
@@ -16,18 +19,26 @@ class NotificationService(Service):
         self._notification_data_access = notification_data_access
         self._user_notification_service = user_notification_service
 
-    @ResultToDict()
     def create(self, title, meta_data: dict, project_id: int = DEFAULT_PROJECT_ID):
-        return self._notification_data_access.create({
+        notification = result_to_dict(self._notification_data_access.create({
             Notification.title.key: title,
             Notification.meta_data.key: meta_data,
             Notification.project_id.key: project_id
-        })
+        }))
+        self._fire_on_create(notification)
+        return notification
+
+    @Observe(event_key=NotificationObserverListener.EVENT_NOTIFICATION_CREATED, observer_name=NOTIFICATION_CORE_LIB_NAME)
+    def _fire_on_create(self, notification: dict):
+        pass
 
     @ResultToDict()
-    def all(self, title: str = None, meta_data: dict = None, user_id: int = None, project_id: int = DEFAULT_PROJECT_ID):
-        notifications = self._notification_data_access.all(title, meta_data, user_id, project_id)
-        return notifications
+    def all(self, title: str = None, meta_data: dict = None, user_id: int = None, project_id: int = DEFAULT_PROJECT_ID, start_row: int = 0):
+        return self._notification_data_access.all(title, meta_data, user_id, project_id, start_row, PER_PAGE_NOTIFICATIONS)
+
+    @ResultToDict()
+    def get_count(self, title: str = None, meta_data: dict = None, project_id: int = DEFAULT_PROJECT_ID):
+        return self._notification_data_access.get_count(title, meta_data, project_id)
 
     def read(self, user_id: int, notification_id: int):
         last_read_notification = self._user_notification_service.get_by_user(user_id)

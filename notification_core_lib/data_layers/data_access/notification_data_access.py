@@ -16,7 +16,7 @@ class NotificationDataAccess(CRUDSoftDeleteDataAccess):
         self.logger = logging.getLogger(self.__class__.__name__)
         self._db = db
 
-    def all(self, title: str, meta_data: dict, user_id: int, project_id: int):
+    def all(self, title: str, meta_data: dict, user_id: int, project_id: int, start_row: int, result_per_page: int):
         with self._db.get() as session:
             query = session.query(
                 *list(Notification.__table__.columns),
@@ -33,10 +33,19 @@ class NotificationDataAccess(CRUDSoftDeleteDataAccess):
                     UserNotification.notification_id.isnot(None)
                 )
             ).filter(Notification.project_id == project_id)
+            query = self._build_filters_query(query, title, meta_data)
+            return query.order_by(Notification.id.desc()).offset(start_row).limit(result_per_page).all()
 
-            if title:
-                query = query.filter(Notification.title.ilike(f'%{title}%'))
-            if meta_data:
-                query = query.filter(cast(Notification.meta_data, JSONB).contains(meta_data))
+    def get_count(self, title: str, meta_data: dict, project_id: int):
+        with self._db.get() as session:
+            query = session.query(Notification).filter(Notification.project_id == project_id)
+            query = self._build_filters_query(query, title, meta_data)
+            return query.count()
 
-            return query.order_by(Notification.id.desc()).all()
+    def _build_filters_query(self, query, title: str, meta_data: dict):
+        if title:
+            query = query.filter(Notification.title.ilike(f'%{title}%'))
+        if meta_data:
+            query = query.filter(cast(Notification.meta_data, JSONB).contains(meta_data))
+
+        return query
