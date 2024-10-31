@@ -37,8 +37,8 @@ class NotificationService(Service):
         return self._notification_data_access.all(title, meta_data, user_id, project_id, start_row, PER_PAGE_NOTIFICATIONS)
 
     @ResultToDict()
-    def get_count(self, title: str = None, meta_data: dict = None, user_id: int = None, project_id: int = DEFAULT_PROJECT_ID):
-        return self._notification_data_access.get_count(title, meta_data, user_id, project_id)
+    def get_count(self, title: str = None, meta_data: dict = None, project_id: int = DEFAULT_PROJECT_ID):
+        return self._notification_data_access.get_count(title, meta_data, project_id)
 
     def read(self, user_id: int, notification_id: int):
         last_read_notification = self._user_notification_service.get_by_user(user_id)

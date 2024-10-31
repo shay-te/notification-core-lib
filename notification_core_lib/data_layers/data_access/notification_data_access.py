@@ -18,30 +18,31 @@ class NotificationDataAccess(CRUDSoftDeleteDataAccess):
 
     def all(self, title: str, meta_data: dict, user_id: int, project_id: int, start_row: int, result_per_page: int):
         with self._db.get() as session:
-            query = self._build_query(session, title, meta_data, user_id, project_id)
+            query = session.query(
+                *list(Notification.__table__.columns),
+                case(
+                    [
+                        (Notification.id > UserNotification.notification_id, False)
+                    ],
+                    else_=True
+                ).label('is_read')
+            ).outerjoin(
+                UserNotification,
+                and_(
+                    UserNotification.user_id == user_id,
+                    UserNotification.notification_id.isnot(None)
+                )
+            ).filter(Notification.project_id == project_id)
+            query = self._build_filters_query(query, title, meta_data)
             return query.order_by(Notification.id.desc()).offset(start_row).limit(result_per_page).all()
 
-    def get_count(self, title: str, meta_data: dict, user_id: int, project_id: int):
+    def get_count(self, title: str, meta_data: dict, project_id: int):
         with self._db.get() as session:
-            query = self._build_query(session, title, meta_data, user_id, project_id)
+            query = session.query(Notification).filter(Notification.project_id == project_id)
+            query = self._build_filters_query(query, title, meta_data)
             return query.count()
 
-    def _build_query(self, session, title: str, meta_data: dict, user_id: int, project_id: int):
-        query = session.query(
-            *list(Notification.__table__.columns),
-            case(
-                [
-                    (Notification.id > UserNotification.notification_id, False)
-                ],
-                else_=True
-            ).label('is_read')
-        ).outerjoin(
-            UserNotification,
-            and_(
-                UserNotification.user_id == user_id,
-                UserNotification.notification_id.isnot(None)
-            )
-        ).filter(Notification.project_id == project_id)
+    def _build_filters_query(self, query, title: str, meta_data: dict):
         if title:
             query = query.filter(Notification.title.ilike(f'%{title}%'))
         if meta_data:
