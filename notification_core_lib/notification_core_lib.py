@@ -5,7 +5,7 @@ from core_lib.alembic.alembic import Alembic
 from core_lib.core_lib import CoreLib
 from core_lib.cache.cache_handler_memcached import CacheHandlerMemcached
 from core_lib.data_layers.data.data_helpers import build_url
-from core_lib.connection.sql_alchemy_connection_registry import SqlAlchemyConnectionRegistry
+from core_lib.connection.sql_alchemy_connection_factory import SqlAlchemyConnectionFactory
 from core_lib.observer.observer import Observer
 from notification_core_lib.constants.core_lib_constants import CACHE, NOTIFICATION_CORE_LIB_NAME
 
@@ -23,7 +23,7 @@ class NotificationCoreLib(CoreLib):
         self.config = conf
 
         CoreLib.cache_registry.register(CACHE, CacheHandlerMemcached(build_url(**self.config.core_lib.notification_core_lib.cache.notification.url)))
-        db = SqlAlchemyConnectionRegistry(self.config.core_lib.data.sqlalchemy)
+        db = CoreLib.connection_factory_registry.get_or_reg(self.config.core_lib.data.sqlalchemy)
         self.notification = NotificationService(
             NotificationDataAccess(db),
             UserNotificationService(UserNotificationDataAccess(db))

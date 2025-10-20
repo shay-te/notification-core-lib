@@ -1,6 +1,6 @@
 import logging
 
-from core_lib.connection.sql_alchemy_connection_registry import SqlAlchemyConnectionRegistry
+from core_lib.connection.sql_alchemy_connection_factory import SqlAlchemyConnectionFactory
 from sqlalchemy import cast, case, and_
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -11,7 +11,7 @@ from notification_core_lib.data_layers.data.db.entities.user_notification import
 
 class NotificationDataAccess(CRUDSoftDeleteDataAccess):
 
-    def __init__(self, db: SqlAlchemyConnectionRegistry):
+    def __init__(self, db: SqlAlchemyConnectionFactory):
         super().__init__(Notification, db)
         self.logger = logging.getLogger(self.__class__.__name__)
         self._db = db

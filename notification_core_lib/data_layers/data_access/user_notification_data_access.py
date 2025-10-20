@@ -1,6 +1,6 @@
 import logging
 
-from core_lib.connection.sql_alchemy_connection_registry import SqlAlchemyConnectionRegistry
+from core_lib.connection.sql_alchemy_connection_factory import SqlAlchemyConnectionFactory
 from core_lib.data_layers.data_access.db.crud.crud_data_access import CRUDDataAccess
 
 from notification_core_lib.data_layers.data.db.entities.user_notification import UserNotification
@@ -8,7 +8,7 @@ from notification_core_lib.data_layers.data.db.entities.user_notification import
 
 class UserNotificationDataAccess(CRUDDataAccess):
 
-    def __init__(self, db: SqlAlchemyConnectionRegistry):
+    def __init__(self, db: SqlAlchemyConnectionFactory):
         super().__init__(UserNotification, db)
         self.logger = logging.getLogger(self.__class__.__name__)
         self._db = db
