@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from core_lib.connection.sql_alchemy_connection_factory import SqlAlchemyConnectionFactory
 from sqlalchemy import cast, case, and_
@@ -41,6 +42,17 @@ class NotificationDataAccess(CRUDSoftDeleteDataAccess):
             query = session.query(Notification).filter(Notification.project_id == project_id)
             query = self._build_filters_query(query, title, meta_data)
             return query.count()
+
+    def delete_by_project_id(self, project_id: int):
+        with self._db.get() as session:
+            session.query(UserNotification).filter(
+                UserNotification.notification_id.in_(
+                    session.query(Notification.id).filter(Notification.project_id == project_id)
+                )
+            ).delete(synchronize_session=False)
+            session.query(Notification).filter(
+                Notification.project_id == project_id, Notification.deleted_at.is_(None)
+            ).update({Notification.deleted_at.key: datetime.utcnow()}, synchronize_session=False)
 
     def _build_filters_query(self, query, title: str, meta_data: dict):
         if title:

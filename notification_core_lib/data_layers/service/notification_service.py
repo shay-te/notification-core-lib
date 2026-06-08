@@ -40,6 +40,9 @@ class NotificationService(Service):
     def get_count(self, title: str = None, meta_data: dict = None, project_id: int = DEFAULT_PROJECT_ID):
         return self._notification_data_access.get_count(title, meta_data, project_id)
 
+    def delete_by_project_id(self, project_id: int):
+        self._notification_data_access.delete_by_project_id(project_id)
+
     def read(self, user_id: int, notification_id: int):
         last_read_notification = self._user_notification_service.get_by_user(user_id)
         if last_read_notification:
