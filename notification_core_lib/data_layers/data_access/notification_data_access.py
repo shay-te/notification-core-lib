@@ -22,9 +22,7 @@ class NotificationDataAccess(CRUDSoftDeleteDataAccess):
             query = session.query(
                 *list(Notification.__table__.columns),
                 case(
-                    [
-                        (Notification.id > UserNotification.notification_id, False)
-                    ],
+                    (Notification.id > UserNotification.notification_id, False),
                     else_=True
                 ).label('is_read')
             ).outerjoin(
